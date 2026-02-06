@@ -1,17 +1,17 @@
 [
   {
-    "name": "",
-    "age": 0,
-    "photo": "url"
+    "name": "Фреди Крюгер",
+    "age": 26,
+    "photo": "https://images.thevoicemag.ru/upload/img_cache/4d0/4d0d3e68e1498e85613bfd2c8211ff83_cropped_490x740.webp"
   },
   {
-    "name": "",
-    "age": 0,
-    "photo": "url"
+    "name": "Тони старк",
+    "age": 48,
+    "photo": "https://citaty.info/files/characters/137301.jpeg"
   },
   {
-    "name": "",
-    "age": 0,
-    "photo": "url"
+    "name": "Гарри Поттер",
+    "age": 17,
+    "photo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMJjC-8uBNSvNjRKom9WgR8FfWiAjdDNt5Bg&s"
   }
 ]

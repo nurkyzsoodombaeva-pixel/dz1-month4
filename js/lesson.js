@@ -63,9 +63,62 @@ const autoSlider = () => {
 autoSlider();
 
 
+const somInput = document.querySelector('#som');
+const usdInput = document.querySelector('#usd');
+const eurInput = document.querySelector('#eur');
+
+const converter = (element, otherElement, otherElement2) => {
+    element.oninput = () => {
+        const request = new XMLHttpRequest();
+        request.open('GET', '../data/converter.json');
+        request.setRequestHeader('Content-type', 'application/json');
+        request.send();
+        request.onload = () => {
+            const response = JSON.parse(request.response);
+            if (element.value === '') {
+                otherElement.value = '';
+                otherElement2.value = '';
+                return;
+            }
+            if(element.id === 'som') {
+                otherElement.value = (element.value / response.usd).toFixed(2);
+                otherElement2.value = (element.value / response['eur-som']).toFixed(2);
+            } else if(element.id === 'usd') {
+                otherElement.value = (element.value * response.usd).toFixed(2);
+                otherElement2.value = (element.value / response['eur-usd']).toFixed(2);
+            } else if(element.id === 'eur') {
+                otherElement.value = (element.value * response['eur-som']).toFixed(2);
+                otherElement2.value = (element.value * response['eur-usd']).toFixed(2);
+            }
+        };
+    };
+};
+
+converter(somInput, usdInput, eurInput);
+converter(usdInput, somInput, eurInput);
+converter(eurInput, somInput, usdInput);
 
 
 
 
+// somInput.oninput = () => {
+//     const reuest = new XMLHttpRequest();
+//     reuest.open('GET', '../data.con');
+//     reuest.setRequestHeader('Content-type', 'application/json');
+//     reuest.send();
+//     reuest.onload = () => {
+//         const data = JSON.parse(reuest.response);
+//         usdInput.value = (somInput.value / data.usd).toFixed(2);
+//     };
+// }
 
-
+// usdInput.oninput = () => {
+//     const reuest = new XMLHttpRequest();
+//     reuest.open('GET', '../data.con');
+//     reuest.setRequestHeader('Content-type', 'application/json');
+//     reuest.send();
+//     reuest.onload = () => {
+//         const data = JSON.parse(reuest.response);
+//         somInput.value = (usdInput.value * data.usd).toFixed(2);
+//     };
+// }

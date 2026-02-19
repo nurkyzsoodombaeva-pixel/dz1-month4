@@ -77,7 +77,7 @@
 }
 
 #post-btn { background-color: #28a745; } /* Green */
-#put-btn { background-color: #ffc107; color: #212529; } /* Yellow */
+.put-btn { background-color: #ffc107; color: #212529; } /* Yellow */
 #delete-btn { background-color: #dc3545; } /* Red */
 
 .post-card {
@@ -91,6 +91,11 @@
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
+.posts-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
 .post-title {
     color: #00aaff;
 }

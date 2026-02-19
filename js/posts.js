@@ -25,11 +25,45 @@ const renderPosts = (posts) => {
     posts.forEach(post => {
         const card = document.createElement('div');
         card.classList.add('post-card');
+        
         card.innerHTML = `
             <img src="https://picsum.photos/seed/${post.id}/300/200" alt="Post Image">
             <h3 class="post-title">${post.title}</h3>
             <p class="post-body">${post.body}</p>
         `;
+        const updateBtn = document.createElement('button');
+        updateBtn.classList.add('action-btn', 'put-btn');
+        updateBtn.textContent = 'put';
+        card.appendChild(updateBtn);
+        updateBtn.addEventListener('click', async (e) => {
+    const postId = post.id;
+    if (!postId) {
+        alert('Чтобы обновить, введите ID поста в поле поиска по ID.');
+        return;
+    }
+
+    const title = prompt("Введите новый заголовок поста:");
+    const body = prompt("Введите новое содержимое поста:");
+
+    if (!title || !body) return;
+
+    try {
+        const response = await fetch(`${API_URL}/${postId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ id: postId, title, body, userId: 1 }),
+            headers: { 'Content-type': 'application/json; charset=UTF-8' },
+        });
+        const updatedPost = await response.json();
+        console.log("Пост обновлен:", updatedPost);
+        alert(`Пост ${updatedPost.id} успешно обновлен!`);
+        // Обновляем пост в кэше и перерисовываем список
+        const postIndex = allPostsCache.findIndex(p => p.id === updatedPost.id);
+        if (postIndex > -1) allPostsCache[postIndex] = updatedPost;
+        renderPosts(allPostsCache);
+    } catch (error) {
+        console.error("Ошибка при обновлении поста:", error);
+    }
+    });
         postsContainer.appendChild(card);
     });
 };
@@ -43,7 +77,7 @@ const searchIdBtn = document.querySelector('#search-id-btn');
 const searchTitleInput = document.querySelector('#search-title-input');
 
 const postBtn = document.querySelector('#post-btn');
-const putBtn = document.querySelector('#put-btn');
+
 const deleteBtn = document.querySelector('#delete-btn');
 
 const API_URL = 'https://jsonplaceholder.typicode.com/posts';
@@ -128,34 +162,4 @@ deleteBtn.addEventListener('click', async () => {
         console.error("Ошибка при удалении поста:", error);
     }
 });
-
-// 5. PUT-запрос (обновление)
-putBtn.addEventListener('click', async () => {
-    const postId = searchIdInput.value.trim();
-    if (!postId) {
-        alert('Чтобы обновить, введите ID поста в поле поиска по ID.');
-        return;
-    }
-
-    const title = prompt("Введите новый заголовок поста:");
-    const body = prompt("Введите новое содержимое поста:");
-
-    if (!title || !body) return;
-
-    try {
-        const response = await fetch(`${API_URL}/${postId}`, {
-            method: 'PUT',
-            body: JSON.stringify({ id: postId, title, body, userId: 1 }),
-            headers: { 'Content-type': 'application/json; charset=UTF-8' },
-        });
-        const updatedPost = await response.json();
-        console.log("Пост обновлен:", updatedPost);
-        alert(`Пост ${updatedPost.id} успешно обновлен!`);
-        // Обновляем пост в кэше и перерисовываем список
-        const postIndex = allPostsCache.findIndex(p => p.id === updatedPost.id);
-        if (postIndex > -1) allPostsCache[postIndex] = updatedPost;
-        renderPosts(allPostsCache);
-    } catch (error) {
-        console.error("Ошибка при обновлении поста:", error);
-    }
-});
+const putBtns = document.querySelectorAll('#put-btn');

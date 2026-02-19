@@ -68,29 +68,37 @@ const usdInput = document.querySelector('#usd');
 const eurInput = document.querySelector('#eur');
 
 const converter = (element, otherElement, otherElement2) => {
-    element.oninput = () => {
-        const request = new XMLHttpRequest();
-        request.open('GET', '../data/converter.json');
-        request.setRequestHeader('Content-type', 'application/json');
-        request.send();
-        request.onload = () => {
-            const response = JSON.parse(request.response);
+    element.oninput = async () => {
+        try {
+            const response = await fetch('../data/converter.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+
             if (element.value === '') {
                 otherElement.value = '';
                 otherElement2.value = '';
                 return;
             }
-            if(element.id === 'som') {
-                otherElement.value = (element.value / response.usd).toFixed(2);
-                otherElement2.value = (element.value / response['eur-som']).toFixed(2);
-            } else if(element.id === 'usd') {
-                otherElement.value = (element.value * response.usd).toFixed(2);
-                otherElement2.value = (element.value / response['eur-usd']).toFixed(2);
-            } else if(element.id === 'eur') {
-                otherElement.value = (element.value * response['eur-som']).toFixed(2);
-                otherElement2.value = (element.value * response['eur-usd']).toFixed(2);
+
+            switch (element.id) {
+                case 'som':
+                    otherElement.value = (element.value / data.usd).toFixed(2);
+                    otherElement2.value = (element.value / data['eur-som']).toFixed(2);
+                    break;
+                case 'usd':
+                    otherElement.value = (element.value * data.usd).toFixed(2);
+                    otherElement2.value = (element.value / data['eur-usd']).toFixed(2);
+                    break;
+                case 'eur':
+                    otherElement.value = (element.value * data['eur-som']).toFixed(2);
+                    otherElement2.value = (element.value * data['eur-usd']).toFixed(2);
+                    break;
             }
-        };
+        } catch (error) {
+            console.error("Converter error:", error);
+        }
     };
 };
 
@@ -131,17 +139,21 @@ const API_URL = 'https://jsonplaceholder.typicode.com/todos'
 
 let todoId = 1;
 
-const getTodo = () => {
-    fetch(`${API_URL}/${todoId}`)
-        .then(response => response.json())
-        .then(({id, title, completed}) => {
-            let color = completed ? 'green' : 'red';
-            card.style.borderColor = color;
-            card.innerHTML = `<p>ID => ${id}</p>
+const getTodo = async () => {
+    try {
+        const response = await fetch(`${API_URL}/${todoId}`);
+        if (!response.ok) throw new Error('Todo not found');
+        const {id, title, completed} = await response.json();
+        const color = completed ? 'green' : 'red';
+        card.style.borderColor = color;
+        card.innerHTML = `<p>ID => ${id}</p>
             <p>${title}</p>
             <p>${completed}</p>
-            <p style="color: ${color}">${completed}</p>`
-        })
+            <p style="color: ${color}">${completed}</p>`;
+    } catch (error) {
+        console.error(error);
+        card.innerHTML = 'Could not fetch TODO';
+    }
 }
 
 getTodo()
@@ -161,13 +173,18 @@ btnPrev.addEventListener('click', () => {
     getTodo()
 })
 
-fetch('https://jsonplaceholder.typicode.com/posts')
-    .then(response => response.json())
-    .then(data => {
-        data.forEach(post => console.log({title: post.title, body: post.body}))
-    })
+const fetchAllPosts = async () => {
+    try {
+        const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+        if (!response.ok) throw new Error('Could not fetch posts');
+        const data = await response.json();
+        data.forEach(post => console.log({title: post.title, body: post.body}));
+    } catch (error) {
+        console.error(error);
+    }
+};
 
-
+fetchAllPosts();
 
 
 // const btnNext1 = document.querySelector("#btn-next1")
@@ -207,3 +224,36 @@ fetch('https://jsonplaceholder.typicode.com/posts')
 //     })
 // }
 // getPosts()
+
+
+const cityInput = document.querySelector('.cityName')
+const searchBtn = document.querySelector('#search')
+const cityText = document.querySelector('.city')
+const tempText = document.querySelector('.temp')
+
+const BASE_API = 'https://api.openweathermap.org/data/2.5/weather';
+const API_KEY = '83b3ebd39b878f8be8acd104821aa61a';
+
+searchBtn.addEventListener('click', async () => {
+    const city = cityInput.value.trim();
+    if (city) {
+        try {
+            const response = await fetch(`${BASE_API}?q=${city}&units=metric&lang=ru&appid=${API_KEY}`);
+            if (!response.ok) {
+                throw new Error('Город не найден');
+            }
+            const data = await response.json();
+            const {name, main: {temp}} = data;
+            cityText.innerHTML = name;
+            tempText.innerHTML = `${Math.round(temp)}°C`;
+        } catch (error) {
+            console.error("Weather fetch error:", error);
+            cityText.innerHTML = 'Укажите правильный город';
+            tempText.innerHTML = '';
+        }
+    } else {
+        cityText.innerHTML = 'Укажите название города';
+        tempText.innerHTML = '';
+    }
+    cityInput.value = '';
+});

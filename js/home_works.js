@@ -81,32 +81,36 @@ resetBtn.addEventListener('click', () => {
     seconds.innerHTML = second;
 })
 const charactersContainer = document.querySelector('.characters-list')
-
-const requester = new XMLHttpRequest()
-requester.open('GET', '../data/characters.json')
-requester.setRequestHeader('Content-type', 'application/json')
-requester.send()
-requester.onload = () => {
-    const data = JSON.parse(requester.response)
-    data.map((character)=> {
-        const card = document.createElement('div')
-        card.classList.add('character-card')
-        card.innerHTML = `
-             <h2>${character.name}</h2>
-    <div class="character-photo"><img src="${character.photo}" alt="${character.name}"></div>
-   
-    <p style="color:white">${character.age}</p>
-        `
-    charactersContainer.appendChild(card)
-    })
+const fetchCharacters = async () => {
+    try {
+        const response = await fetch('../data/characters.json');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        data.forEach((character) => {
+            const card = document.createElement('div');
+            card.classList.add('character-card');
+            card.innerHTML = `
+                 <h2>${character.name}</h2>
+                 <div class="character-photo"><img src="${character.photo}" alt="${character.name}"></div>
+                 <p style="color:white">${character.age}</p>
+            `;
+            charactersContainer.appendChild(card);
+        });
+    } catch (error) {
+        console.error("Could not fetch characters:", error);
+    }
+};
+fetchCharacters();
+const fetchBio = async () => {
+    try {
+        const response = await fetch('../data/bio.json');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        console.log(data);
+    } catch (error) {
+        console.error("Could not fetch bio:", error);
+    }
 }
-
-
-const qwerty = new XMLHttpRequest()
-qwerty.open('GET', '../data/bio.json')
-qwerty.setRequestHeader('Content-type', 'application/json')
-qwerty.send()
-qwerty.onload = () => {
-    const data = JSON.parse(qwerty.response)
-    console.log(data);
-}
+fetchBio();
